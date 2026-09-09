@@ -4,11 +4,11 @@
 apiVersion: fleet.cattle.io/v1alpha1
 kind: GitRepo
 metadata:
-  name: fleet-base-apps
+  name: rancher-fleet-poc
   namespace: fleet-default
 spec:
   # Git repository URL
-  repo: https://github.com/your-org/fleet-base-apps
+  repo: https://github.com/aymanlinuxBoy/Rancher-fleet.git
   # or for self-hosted Git:
   # repo: https://gitea.yourdomain.local/your-org/fleet-base-apps
 
@@ -20,7 +20,7 @@ spec:
     - bundles/external-secrets-operator
 
   # Sync interval (how often Fleet checks for updates)
-  clientSecretName: git-repo-secret
+  #clientSecretName: git-repo-secret
   # Create this secret with: kubectl create secret generic git-repo-secret \
   #   --from-literal=ssh-privatekey="$(cat ~/.ssh/id_rsa)" \
   #   -n fleet-default
@@ -31,6 +31,6 @@ spec:
   forceBranch: false
 
   # Target configuration
-  targets:
+  #targets:
     # Deploy to all clusters
-    - clusterGroupSelector: {}
+    #- clusterGroupSelector: {}
