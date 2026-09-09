@@ -8,5 +8,12 @@ spec:
   branch: main
   paths:
     - bundles
+
+  targets:
+    - name: downstream
+      clusterName: downstream
+
+  recurseSubmodules: false
+  forceBranch: false
   recurseSubmodules: false
   forceBranch: false
