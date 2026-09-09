@@ -1,0 +1,36 @@
+# Cert Manager - Fleet Bundle
+# Required by Rancher and other apps for TLS certificate management
+
+apiVersion: fleet.cattle.io/v1alpha1
+kind: Bundle
+metadata:
+  name: cert-manager
+  namespace: fleet-default
+spec:
+  # Deploy to all clusters
+  targets:
+    - clusterGroupSelector: {}
+
+  helm:
+    chart: cert-manager
+    repo: https://charts.jetstack.io
+    releaseName: cert-manager
+    releaseNamespace: cert-manager
+    createNamespace: true
+    values:
+      installCRDs: true
+      global:
+        leaderElection:
+          namespace: cert-manager
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+
+  # Rollout settings
+  rolloutStrategy:
+    autoPartitionSize: 1
+    maxUnavailable: 1

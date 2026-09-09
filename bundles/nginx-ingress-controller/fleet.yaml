@@ -1,0 +1,51 @@
+# Nginx Ingress Controller - Fleet Bundle
+# Ingress controller for HTTP/HTTPS routing
+# REQUIRED for exposing applications
+
+apiVersion: fleet.cattle.io/v1alpha1
+kind: Bundle
+metadata:
+  name: nginx-ingress-controller
+  namespace: fleet-default
+spec:
+  # Deploy to all clusters
+  targets:
+    - clusterGroupSelector: {}
+
+  helm:
+    chart: ingress-nginx
+    repo: https://kubernetes.github.io/ingress-nginx
+    releaseName: nginx-ingress-controller
+    releaseNamespace: ingress-nginx
+    createNamespace: true
+    values:
+      controller:
+        service:
+          type: LoadBalancer
+          externalTrafficPolicy: Local
+
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+        metrics:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+            namespace: monitoring
+
+        autoscaling:
+          enabled: false
+          minReplicas: 2
+          maxReplicas: 4
+          targetCPUUtilizationPercentage: 80
+
+      rbac:
+        create: true
+
+      serviceAccount:
+        create: true

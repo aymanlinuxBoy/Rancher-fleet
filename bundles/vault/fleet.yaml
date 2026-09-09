@@ -1,0 +1,81 @@
+# Vault - Fleet Bundle
+# Centralized secrets management (UPSTREAM cluster only)
+
+apiVersion: fleet.cattle.io/v1alpha1
+kind: Bundle
+metadata:
+  name: vault
+  namespace: fleet-default
+spec:
+  # Deploy to upstream/local cluster ONLY
+  targets:
+    - clusterGroup: local
+
+  helm:
+    chart: vault
+    repo: https://helm.releases.hashicorp.com
+    releaseName: vault
+    releaseNamespace: vault
+    createNamespace: true
+    values:
+      # Development mode for POC
+      # Switch to standalone/HA for production
+      server:
+        dataStorage:
+          size: 10Gi
+
+        dev:
+          enabled: true
+          devRootToken: "root-token-poc"  # CHANGE THIS in production
+
+        standalone:
+          enabled: false  # Use dev mode for POC
+
+        # For production, uncomment HA:
+        # ha:
+        #   enabled: true
+        #   replicas: 3
+        #   raft:
+        #     enabled: true
+
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+        dataStorage:
+          enabled: true
+          size: 10Gi
+          storageClass: "longhorn"  # Use longhorn after it's deployed
+
+      ui:
+        enabled: true
+
+      # Service for cross-cluster access
+      service:
+        enabled: true
+        type: ClusterIP
+        port: 8200
+
+      # Ingress
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        hosts:
+          - host: vault.yourdomain.local  # Change to your domain
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - secretName: vault-tls
+            hosts:
+              - vault.yourdomain.local
+
+      rbac:
+        create: true
+
+      serviceAccount:
+        create: true

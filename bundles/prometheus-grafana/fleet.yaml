@@ -1,0 +1,132 @@
+# Prometheus + Grafana - Fleet Bundle
+# Monitoring stack for cluster and application metrics
+
+apiVersion: fleet.cattle.io/v1alpha1
+kind: Bundle
+metadata:
+  name: prometheus-grafana
+  namespace: fleet-default
+spec:
+  # Deploy to all clusters
+  targets:
+    - clusterGroupSelector: {}
+
+  helm:
+    chart: kube-prometheus-stack
+    repo: https://prometheus-community.github.io/helm-charts
+    releaseName: kube-prometheus-stack
+    releaseNamespace: monitoring
+    createNamespace: true
+    values:
+      # Prometheus settings
+      prometheus:
+        enabled: true
+        ingress:
+          enabled: true
+          ingressClassName: nginx
+          hosts:
+            - prometheus.yourdomain.local  # Change to your domain
+          tls:
+            - secretName: prometheus-tls
+              hosts:
+                - prometheus.yourdomain.local
+
+        prometheusSpec:
+          replicas: 1
+          retention: 30d
+          storageSpec:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: longhorn
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 50Gi
+
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+
+      # Grafana settings
+      grafana:
+        enabled: true
+        adminPassword: changeme  # Change this!
+        replicas: 1
+
+        ingress:
+          enabled: true
+          ingressClassName: nginx
+          hosts:
+            - grafana.yourdomain.local  # Change to your domain
+          tls:
+            - secretName: grafana-tls
+              hosts:
+                - grafana.yourdomain.local
+
+        persistence:
+          enabled: true
+          storageClassName: longhorn
+          size: 10Gi
+
+        datasources:
+          datasources.yaml:
+            apiVersion: 1
+            datasources:
+              - name: Prometheus
+                type: prometheus
+                url: http://kube-prometheus-stack-prometheus:9090
+                isDefault: true
+
+        dashboardProviders:
+          dashboardproviders.yaml:
+            apiVersion: 1
+            providers:
+              - name: default
+                orgId: 1
+                folder: ''
+                type: file
+                disableDeletion: false
+                editable: true
+                options:
+                  path: /var/lib/grafana/dashboards/default
+
+        dashboards:
+          default:
+            kubernetes-cluster:
+              gnetId: 7249
+              revision: 1
+              datasource: Prometheus
+
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 512Mi
+
+      # Alert Manager
+      alertmanager:
+        enabled: true
+        alertmanagerSpec:
+          replicas: 1
+          storage:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: longhorn
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 5Gi
+
+      # Service Monitors (automatic scrape targets)
+      kubeControllerManager:
+        enabled: true
+      kubeEtcd:
+        enabled: false
+      kubeScheduler:
+        enabled: false

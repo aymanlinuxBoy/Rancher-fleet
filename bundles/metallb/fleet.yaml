@@ -1,0 +1,59 @@
+# MetalLB - Fleet Bundle
+# Bare-metal load balancer for LoadBalancer service type
+# REQUIRED for bare-metal Kubernetes
+
+apiVersion: fleet.cattle.io/v1alpha1
+kind: Bundle
+metadata:
+  name: metallb
+  namespace: fleet-default
+spec:
+  # Deploy to all clusters
+  targets:
+    - clusterGroupSelector: {}
+
+  helm:
+    chart: metallb
+    repo: https://metallb.universe.tf
+    releaseName: metallb
+    releaseNamespace: metallb-system
+    createNamespace: true
+    values:
+      configInline:
+        # IP address pool for LoadBalancer services
+        # Adjust these IPs based on your infrastructure
+        address-pools:
+          - name: default
+            protocol: layer2
+            addresses:
+              - 192.168.1.240-192.168.1.250  # Change to your IP range
+
+      controller:
+        enabled: true
+        replicas: 1
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+
+      speaker:
+        enabled: true
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+
+      rbac:
+        create: true
+
+      serviceAccounts:
+        controller:
+          create: true
+        speaker:
+          create: true

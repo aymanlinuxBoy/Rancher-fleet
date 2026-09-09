@@ -1,0 +1,65 @@
+# External Secrets Operator - Fleet Bundle
+# Sync secrets from Vault to K8s (DOWNSTREAM cluster only)
+
+apiVersion: fleet.cattle.io/v1alpha1
+kind: Bundle
+metadata:
+  name: external-secrets-operator
+  namespace: fleet-default
+spec:
+  # Deploy to downstream clusters ONLY
+  targets:
+    - clusterGroupSelector:
+        matchLabels:
+          cluster.fleet.cattle.io/name: "!=local"
+
+  helm:
+    chart: external-secrets
+    repo: https://charts.external-secrets.io
+    releaseName: external-secrets-operator
+    releaseNamespace: external-secrets-system
+    createNamespace: true
+    values:
+      replicaCount: 2
+
+      image:
+        repository: ghcr.io/external-secrets/external-secrets
+        tag: v0.9.9
+        pullPolicy: IfNotPresent
+
+      serviceAccount:
+        create: true
+        name: external-secrets-operator
+
+      rbac:
+        create: true
+
+      webhook:
+        enabled: true
+        replicaCount: 2
+        certManager:
+          enabled: true
+          cert:
+            duration: 2160h  # 90d
+            renewBefore: 720h  # 30d
+
+      certController:
+        enabled: true
+
+      resources:
+        limits:
+          cpu: 100m
+          memory: 128Mi
+        requests:
+          cpu: 50m
+          memory: 64Mi
+
+      podSecurityPolicy:
+        enabled: false
+
+      # Tolerations for node taints
+      tolerations: []
+
+      # Pod disruption budget for high availability
+      podDisruptionBudget:
+        enabled: false

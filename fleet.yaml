@@ -1,0 +1,36 @@
+# Root Fleet Configuration
+# This tells Fleet where to find bundles
+
+apiVersion: fleet.cattle.io/v1alpha1
+kind: GitRepo
+metadata:
+  name: fleet-base-apps
+  namespace: fleet-default
+spec:
+  # Git repository URL
+  repo: https://github.com/your-org/fleet-base-apps
+  # or for self-hosted Git:
+  # repo: https://gitea.yourdomain.local/your-org/fleet-base-apps
+
+  # Branch to track
+  branch: main
+
+  # Path to bundles in the repo
+  paths:
+    - bundles
+
+  # Sync interval (how often Fleet checks for updates)
+  clientSecretName: git-repo-secret
+  # Create this secret with: kubectl create secret generic git-repo-secret \
+  #   --from-literal=ssh-privatekey="$(cat ~/.ssh/id_rsa)" \
+  #   -n fleet-default
+  # Or use username/password for HTTPS
+
+  # Automatic sync settings
+  recurseSubmodules: false
+  forceBranch: false
+
+  # Target configuration
+  targets:
+    # Deploy to all clusters
+    - clusterGroupSelector: {}

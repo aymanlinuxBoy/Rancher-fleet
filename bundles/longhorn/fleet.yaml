@@ -1,0 +1,68 @@
+# Longhorn - Fleet Bundle
+# Distributed block storage for persistent volumes
+# Recommended for stateful applications
+
+apiVersion: fleet.cattle.io/v1alpha1
+kind: Bundle
+metadata:
+  name: longhorn
+  namespace: fleet-default
+spec:
+  # Deploy to all clusters
+  targets:
+    - clusterGroupSelector: {}
+
+  helm:
+    chart: longhorn
+    repo: https://charts.longhorn.io
+    releaseName: longhorn
+    releaseNamespace: longhorn-system
+    createNamespace: true
+    values:
+      persistence:
+        defaultClass: true
+        defaultClassReplicaCount: 3
+        reclaimPolicy: Delete
+        migratable: false
+        recurringJobSelector:
+          isGroup: false
+
+      csi:
+        kubeletRootDir: /var/lib/kubelet
+
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        host: longhorn-ui.yourdomain.local  # Change to your domain
+        tls: true
+
+      manager:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+      ui:
+        replicas: 1
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+          namespace: monitoring
+
+      defaultSettings:
+        storageMinimalFilesystemUtilization: 10
+        allowRecurringJobWhileVolumeDetached: true
+        disableSchedulingOnCordonedNode: true
+        autoDeletePodWhenVolumeDetachedUnexpectedly: true

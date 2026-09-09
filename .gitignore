@@ -1,0 +1,52 @@
+# Secrets and credentials
+vault-credentials.txt
+*.key
+*.pem
+*.crt
+*.csr
+
+# Local development
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+/tmp/
+/temp/
+
+# Kubeconfig files
+kubeconfig
+kubeconfig.yaml
+kubeconfig.local
+
+# Helm
+charts/
+Chart.lock
+
+# Generated files
+*.auto.tfvars
+terraform.tfstate*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Don't commit large binary files
+*.tar.gz
+*.tar
+*.zip
+
+# Keep sample values, just not actual credentials
+# Good: values.sample.yaml
+# Bad: values.yaml (if it has real creds)
