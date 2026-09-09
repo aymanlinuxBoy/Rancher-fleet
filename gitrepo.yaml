@@ -17,7 +17,7 @@ spec:
 
   # Path to bundles in the repo
   paths:
-    - bundles
+    - bundles/external-secrets-operator
 
   # Sync interval (how often Fleet checks for updates)
   clientSecretName: git-repo-secret

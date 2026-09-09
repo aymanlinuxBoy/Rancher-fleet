@@ -1,0 +1,18 @@
+defaultNamespace: external-secrets-system
+
+helm:
+  repo: https://charts.external-secrets.io
+  chart: external-secrets
+  releaseName: external-secrets-operator
+
+  values:
+    installCRDs: true
+
+    serviceAccount:
+      create: true
+
+    webhook:
+      enabled: true
+
+    certController:
+      enabled: true
