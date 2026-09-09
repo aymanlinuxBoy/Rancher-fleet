@@ -1,16 +1,12 @@
 apiVersion: fleet.cattle.io/v1alpha1
 kind: GitRepo
-
 metadata:
   name: rancher-fleet-poc
   namespace: fleet-default
-
 spec:
   repo: https://github.com/aymanlinuxBoy/Rancher-fleet.git
   branch: main
-
   paths:
-    - bundles/external-secrets-operator
-
+    - bundles
   recurseSubmodules: false
   forceBranch: false
